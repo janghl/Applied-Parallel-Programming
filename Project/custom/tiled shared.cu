@@ -2,7 +2,7 @@
 #include <iostream>
 #include "gpu-new-forward.h"
 #define TILE_WIDTH 8
-__global__ void conv_forward_kernel(float *__restrict__ output, const float *__restrict__ input, const float *__restrict__ mask, const int B, const int M, const int C, const int H, const int W, const int K,const int S)
+__global__ void conv_forward_kernel(float *output, const float *input, const float *mask, const int B, const int M, const int C, const int H, const int W, const int K,const int S)
 {
     /*
     Modify this function to implement the forward pass described in Chapter 16.
@@ -68,32 +68,14 @@ __global__ void conv_forward_kernel(float *__restrict__ output, const float *__r
             __syncthreads();
 
             if(h<H_out && w<W_out)
-                #pragma unroll
                 for(int p = 0; p < K; p++) // KxK filter
-                    #pragma unroll
                     for(int q = 0; q < K; q++)
                         sum += IPT[y*S+p][x*S+q] * MSK[p][q]; 
-                //         // sum += IPT[y*S+p][x*S+q] * mask_4d(m, c, p, q); 
-                //         // out_4d(b, m, h, w) += in_4d(b, c, h*S + p, w*S + q ) * mask_4d(m, c, p, q);
-                //         // sum += in_4d(b, c, h*S + p, w*S + q ) * mask_4d(m, c, p, q);
-                //         // sum += in_4d(b, c, h*S + p, w*S + q ) * MSK[p][q];
-                // {
-                    // int ys0 = y*S+0;
-                    // int ys1 = y*S+1;
-                    // int ys2 = y*S+2;
-                    // int xs0 = x*S+0;
-                    // int xs1 = x*S+1;
-                    // int xs2 = x*S+2;
-                    // sum += IPT[ys0][xs0] * MSK[0][0];
-                    // sum += IPT[ys0][xs1] * MSK[0][1];
-                    // sum += IPT[ys0][xs1] * MSK[0][2];
-                    // sum += IPT[ys1][xs0] * MSK[1][0];
-                //     sum += IPT[ys1][xs1] * MSK[1][1];
-                //     sum += IPT[ys1][xs2] * MSK[1][2];
-                //     sum += IPT[ys2][xs0] * MSK[2][0];
-                //     sum += IPT[ys2][xs2] * MSK[2][1];
-                //     sum += IPT[ys2][xs2] * MSK[2][2];
-                // }
+                        // sum += IPT[y*S+p][x*S+q] * mask_4d(m, c, p, q); 
+                        // out_4d(b, m, h, w) += in_4d(b, c, h*S + p, w*S + q ) * mask_4d(m, c, p, q);
+                        // sum += in_4d(b, c, h*S + p, w*S + q ) * mask_4d(m, c, p, q);
+                        // sum += in_4d(b, c, h*S + p, w*S + q ) * MSK[p][q];
+            
             __syncthreads();
             
         }
